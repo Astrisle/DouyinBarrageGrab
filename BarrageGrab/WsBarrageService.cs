@@ -204,13 +204,14 @@ namespace BarrageGrab
             {
                 MsgId = e.Common.msgId,
                 RoomId = e.Common.roomId,
-                Content = $"{e.User.Nickname} 送出 {e.Gift.Name} x {currCount} 个，增量{count}个",
+                Content = $"{e.User.Nickname} 送出 {e.Gift.Name} x {currCount} 个 -> {e.toUser.Nickname}，增量{count}个",
                 DiamondCount = e.Gift.diamondCount,
                 RepeatCount = currCount,
                 GiftCount = count,
                 GiftId = e.giftId,
                 GiftName = e.Gift.Name,
-                User = GetUser(e.User)
+                User = GetUser(e.User),
+                To = GetUser(e.toUser)
             };
 
             Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.Red, BarrageMsgType.礼物消息);

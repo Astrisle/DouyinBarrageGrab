@@ -1,4 +1,6 @@
-﻿namespace BarrageGrab.JsonEntity
+﻿using BarrageGrab.ProtoEntity;
+
+namespace BarrageGrab.JsonEntity
 {
     /// <summary>
     /// 弹幕消息类型
@@ -171,6 +173,11 @@
         /// 礼物ID
         /// </summary>
         public long GiftId { get; set; }
+
+        /// <summary>
+        /// 接收人
+        /// </summary>
+        public MsgUser To { get; set; }
 
         /// <summary>
         /// 礼物名称
