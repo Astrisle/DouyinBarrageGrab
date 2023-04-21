@@ -1,4 +1,5 @@
 ﻿using BarrageGrab.ProtoEntity;
+using System;
 
 namespace BarrageGrab.JsonEntity
 {
@@ -160,7 +161,7 @@ namespace BarrageGrab.JsonEntity
 
         public string GenderToString()
         {
-            return Gender == 1 ? "男" : Gender == 2 ? "女" : "妖";
+            return Gender == 1 ? "男" : Gender == 2 ? "女" : "未知";
         }
     }
 

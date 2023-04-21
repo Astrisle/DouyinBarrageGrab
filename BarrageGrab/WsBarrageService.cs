@@ -89,7 +89,7 @@ namespace BarrageGrab
                 Id = data.Id,
                 Level = data.Level,
                 Nickname = data.Nickname,
-                HeadImgUrl = data.avatarThumb.urlLists.FirstOrDefault() ?? "",
+                HeadImgUrl = data.avatarThumb?.urlLists.FirstOrDefault() ?? "",
                 SecUid = data.sec_uid
             };
             user.FansClub = new FansClubInfo()
@@ -119,10 +119,10 @@ namespace BarrageGrab
                 Type = e.Type,
                 User = GetUser(e.User)
             };
-            Print(enty.User.GenderToString() + "  " + enty.Content, ConsoleColor.Blue, BarrageMsgType.粉丝团消息);
-            var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.粉丝团消息);
-            var json = JsonConvert.SerializeObject(pack);
-            this.Broadcast(json);
+            //Print(enty.User.GenderToString() + "  " + enty.Content, ConsoleColor.Blue, BarrageMsgType.粉丝团消息);
+            //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.粉丝团消息);
+            //var json = JsonConvert.SerializeObject(pack);
+            //this.Broadcast(json);
         }
 
         //统计消息
@@ -140,15 +140,16 @@ namespace BarrageGrab
                 Content = $"当前直播间人数 {e.onlineUserForAnchor}，累计直播间人数 {e.totalPvForAnchor}",
                 User = null
             };
-            Print(enty.Content, ConsoleColor.Magenta, BarrageMsgType.直播间统计);
-            var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.直播间统计);
-            var json = JsonConvert.SerializeObject(pack);
-            this.Broadcast(json);
+            //Print(enty.Content, ConsoleColor.Magenta, BarrageMsgType.直播间统计);
+            //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.直播间统计);
+            //var json = JsonConvert.SerializeObject(pack);
+            //this.Broadcast(json);
         }
 
         //礼物
         private void Grab_OnGiftMessage(object sender, ProtoEntity.GiftMessage e)
         {
+            Print("gift",ConsoleColor.White, BarrageMsgType.礼物消息); 
             if (!CheckRoomId(e.Common.roomId)) return;
 
             var key = e.giftId + "-" + e.groupId.ToString();
@@ -211,10 +212,11 @@ namespace BarrageGrab
                 GiftId = e.giftId,
                 GiftName = e.Gift.Name,
                 User = GetUser(e.User),
-                To = GetUser(e.toUser)
+                To = GetUser(e.toUser),
             };
 
-            Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.Red, BarrageMsgType.礼物消息);
+            Console.WriteLine("Before Print");
+            Print($" {enty.User.GenderToString()}  {enty.Content}", ConsoleColor.Red, BarrageMsgType.礼物消息);
             var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.礼物消息);
             var json = JsonConvert.SerializeObject(pack);
             this.Broadcast(json);
@@ -233,10 +235,10 @@ namespace BarrageGrab
                 User = GetUser(e.User)
             };
 
-            Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.Yellow, BarrageMsgType.关注消息);
-            var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.关注消息);
-            var json = JsonConvert.SerializeObject(pack);
-            this.Broadcast(json);
+            //Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.Yellow, BarrageMsgType.关注消息);
+            //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.关注消息);
+            //var json = JsonConvert.SerializeObject(pack);
+            //this.Broadcast(json);
         }
 
         //直播间分享
@@ -259,10 +261,10 @@ namespace BarrageGrab
                 User = GetUser(e.User)
             };
             //shareTarget: (112:好友),(1微信)(2朋友圈)(3微博)(5:qq)(4:qq空间),shareType: 1
-            Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.DarkBlue, BarrageMsgType.直播间分享);
-            var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.直播间分享);
-            var json = JsonConvert.SerializeObject(pack);
-            this.Broadcast(json);
+            //Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.DarkBlue, BarrageMsgType.直播间分享);
+            //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.直播间分享);
+            //var json = JsonConvert.SerializeObject(pack);
+            //this.Broadcast(json);
         }
 
         //来了
@@ -278,10 +280,10 @@ namespace BarrageGrab
                 CurrentCount = e.memberCount,
                 User = GetUser(e.User)
             };
-            Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.Green, BarrageMsgType.进直播间);
-            var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.进直播间);
-            var json = JsonConvert.SerializeObject(pack);
-            this.Broadcast(json);
+            //Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.Green, BarrageMsgType.进直播间);
+            //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.进直播间);
+            //var json = JsonConvert.SerializeObject(pack);
+            //this.Broadcast(json);
         }
 
         //点赞
@@ -298,10 +300,10 @@ namespace BarrageGrab
                 Total = e.Total,
                 User = GetUser(e.User)
             };
-            Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.Cyan, BarrageMsgType.点赞消息);
-            var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.点赞消息);
-            var json = JsonConvert.SerializeObject(pack);
-            this.Broadcast(json);
+            //Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.Cyan, BarrageMsgType.点赞消息);
+            //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.点赞消息);
+            //var json = JsonConvert.SerializeObject(pack);
+            //this.Broadcast(json);
         }
 
         //弹幕
