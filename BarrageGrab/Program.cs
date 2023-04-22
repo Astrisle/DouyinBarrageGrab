@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BarrageGrab
 {
@@ -28,7 +24,7 @@ namespace BarrageGrab
                 }
             }
 
-        end:
+            end:
             server.Close();
             Console.WriteLine("服务器已正常关闭，按任意键结束...");
             Console.ReadKey();

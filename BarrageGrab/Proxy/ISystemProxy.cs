@@ -1,7 +1,5 @@
-﻿using System;
-using System.Reflection;
-using System.Collections.Generic;
-using BarrageGrab.Proxy.ProxyEventArgs;
+﻿using BarrageGrab.Proxy.ProxyEventArgs;
+using System;
 
 namespace BarrageGrab.Proxy
 {
@@ -22,5 +20,5 @@ namespace BarrageGrab.Proxy
         void Start();
     }
 
-    
+
 }

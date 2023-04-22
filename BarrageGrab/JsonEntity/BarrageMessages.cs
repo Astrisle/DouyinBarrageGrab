@@ -1,4 +1,4 @@
-﻿using BarrageGrab.ProtoEntity;
+﻿using Newtonsoft.Json;
 using System;
 
 namespace BarrageGrab.JsonEntity
@@ -11,7 +11,7 @@ namespace BarrageGrab.JsonEntity
         无 = 0,
         弹幕消息 = 1,
         点赞消息 = 2,
-        进直播间 = 3,
+        进房提醒 = 3,
         关注消息 = 4,
         礼物消息 = 5,
         直播间统计 = 6,
@@ -29,12 +29,12 @@ namespace BarrageGrab.JsonEntity
         粉丝团升级 = 1,
         加入粉丝团 = 2
     }
-       
+
     /// <summary>
     /// 直播间分享目标
     /// </summary>
     public enum ShareType
-    {        
+    {
         未知 = 0,
         微信 = 1,
         朋友圈 = 2,
@@ -157,7 +157,7 @@ namespace BarrageGrab.JsonEntity
         /// <summary>
         /// 粉丝团信息
         /// </summary>
-        public FansClubInfo FansClub { get; set; }        
+        public FansClubInfo FansClub { get; set; }
 
         public string GenderToString()
         {
@@ -188,7 +188,7 @@ namespace BarrageGrab.JsonEntity
         /// <summary>
         /// 本次(增量)礼物数量
         /// </summary>
-        public long GiftCount { get; set; }        
+        public long GiftCount { get; set; }
 
         /// <summary>
         /// 礼物数量(连续的)
@@ -264,15 +264,116 @@ namespace BarrageGrab.JsonEntity
         /// </summary>
         public long CurrentCount { get; set; }
     }
-    
+
     /// <summary>
     /// 直播间分享
     /// </summary>
-    public class ShareMessage: Msg
-    {   
+    public class ShareMessage : Msg
+    {
         /// <summary>
         /// 分享目标
         /// </summary>
         public ShareType ShareType { get; set; }
+    }
+
+    /// <summary>
+    /// 斗鱼STT弹幕协议显示基准
+    /// </summary>
+    public class STTBaseTemplate
+    {
+        /// <summary>
+        /// 消息类型
+        /// </summary>
+        [JsonProperty("type")]
+        public string Type { get; set; }
+
+        /// <summary>
+        /// 唯一Key
+        /// </summary>
+        [JsonProperty("key")]
+        public long Key { get; set; }
+
+        /// <summary>
+        /// Date String
+        /// </summary>
+        [JsonProperty("dt")]
+        public string SendTime { get; set; } = DateTime.Now.ToString("HH:mm:ss");
+    }
+
+    /// <summary>
+    /// STT礼物JSON结构
+    /// </summary>
+    public class STTGift : STTBaseTemplate
+    {
+        /// <summary>
+        /// 送礼用户名
+        /// </summary>
+        [JsonProperty("nn")]
+        public string UserName { get; set; }
+        /// <summary>
+        /// 礼物ID
+        /// </summary>
+        [JsonProperty("gfid")]
+        public long GiftId { get; set; }
+        /// <summary>
+        /// 礼物名 - 新增
+        /// </summary>
+        [JsonProperty("gfname")]
+        public string GiftName { get; set; }
+        /// <summary>
+        /// 礼物数量 - TODO: 区分批量/单体
+        /// </summary>
+        [JsonProperty("gfcnt")]
+        public int Count { get; set; }
+        /// <summary>
+        /// 连击数
+        /// </summary>
+        [JsonProperty("hits")]
+        public int Hits { get; set; }
+        /// <summary>
+        /// 礼物价格
+        /// </summary>
+        [JsonProperty("price")]
+        public int Price { get; set; }
+        /// <summary>
+        /// 接收人
+        /// </summary>
+        [JsonProperty("to")]
+        public string To { get; set; }
+
+    }
+
+    /// <summary>
+    /// STT弹幕消息JSON结构
+    /// </summary>
+    public class STTChatMessage : STTBaseTemplate
+    {
+        /// <summary>
+        /// 用户名
+        /// </summary>
+        [JsonProperty("nn")]
+        public string UserName { get; set; }
+        /// <summary>
+        /// 弹幕内容
+        /// </summary>
+        [JsonProperty("txt")]
+        public string Message { get; set; }
+    }
+
+    /// <summary>
+    /// STT进房提醒JSON结构
+    /// </summary>
+    public class STTUserEnter : STTBaseTemplate
+    {
+        /// <summary>
+        /// 用户名
+        /// </summary>
+        [JsonProperty("nn")]
+        public string UserName { get; set; }
+    }
+
+    public class STTRoomStats : STTBaseTemplate
+    {
+
     }
 }

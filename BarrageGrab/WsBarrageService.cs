@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.WebSockets;
-using System.Text;
-using System.Threading.Tasks;
-using System.Timers;
-using BarrageGrab.JsonEntity;
+﻿using BarrageGrab.JsonEntity;
 using BarrageGrab.ProtoEntity;
+using BarrageGrab.Utils;
 using ColorConsole;
 using Fleck;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using static BarrageGrab.ProtoEntity.Image;
+using System;
+using System.CodeDom;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Timers;
 
 namespace BarrageGrab
 {
@@ -31,6 +29,7 @@ namespace BarrageGrab
         WssBarrageGrab grab = new WssBarrageGrab();
         Appsetting Appsetting = Appsetting.Current;
         bool debug = false;
+        Douyu stt = new Douyu();
 
         public WsBarrageService()
         {
@@ -110,15 +109,15 @@ namespace BarrageGrab
         //粉丝团
         private void Grab_OnFansclubMessage(object sender, ProtoEntity.FansclubMessage e)
         {
-            if (!CheckRoomId(e.Common.roomId)) return;
-            var enty = new FansclubMsg()
-            {
-                MsgId = e.Common.msgId,
-                Content = e.Content,
-                RoomId = e.Common.roomId,
-                Type = e.Type,
-                User = GetUser(e.User)
-            };
+            //if (!CheckRoomId(e.Common.roomId)) return;
+            //var enty = new FansclubMsg()
+            //{
+            //    MsgId = e.Common.msgId,
+            //    Content = e.Content,
+            //    RoomId = e.Common.roomId,
+            //    Type = e.Type,
+            //    User = GetUser(e.User)
+            //};
             //Print(enty.User.GenderToString() + "  " + enty.Content, ConsoleColor.Blue, BarrageMsgType.粉丝团消息);
             //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.粉丝团消息);
             //var json = JsonConvert.SerializeObject(pack);
@@ -128,18 +127,18 @@ namespace BarrageGrab
         //统计消息
         private void Grab_OnRoomUserSeqMessage(object sender, ProtoEntity.RoomUserSeqMessage e)
         {
-            if (!CheckRoomId(e.Common.roomId)) return;
-            var enty = new UserSeqMsg()
-            {
-                MsgId = e.Common.msgId,
-                OnlineUserCount = e.Total,
-                TotalUserCount = e.totalUser,
-                TotalUserCountStr = e.totalPvForAnchor,
-                OnlineUserCountStr = e.onlineUserForAnchor,
-                RoomId = e.Common.roomId,
-                Content = $"当前直播间人数 {e.onlineUserForAnchor}，累计直播间人数 {e.totalPvForAnchor}",
-                User = null
-            };
+            //if (!CheckRoomId(e.Common.roomId)) return;
+            //var enty = new UserSeqMsg()
+            //{
+            //    MsgId = e.Common.msgId,
+            //    OnlineUserCount = e.Total,
+            //    TotalUserCount = e.totalUser,
+            //    TotalUserCountStr = e.totalPvForAnchor,
+            //    OnlineUserCountStr = e.onlineUserForAnchor,
+            //    RoomId = e.Common.roomId,
+            //    Content = $"当前直播间人数 {e.onlineUserForAnchor}，累计直播间人数 {e.totalPvForAnchor}",
+            //    User = null
+            //};
             //Print(enty.Content, ConsoleColor.Magenta, BarrageMsgType.直播间统计);
             //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.直播间统计);
             //var json = JsonConvert.SerializeObject(pack);
@@ -149,7 +148,6 @@ namespace BarrageGrab
         //礼物
         private void Grab_OnGiftMessage(object sender, ProtoEntity.GiftMessage e)
         {
-            Print("gift",ConsoleColor.White, BarrageMsgType.礼物消息); 
             if (!CheckRoomId(e.Common.roomId)) return;
 
             var key = e.giftId + "-" + e.groupId.ToString();
@@ -197,7 +195,7 @@ namespace BarrageGrab
             }
             //比上次小，则说明先后顺序出了问题，直接丢掉，应为比它大的消息已经处理过了
             if (backward) return;
-            
+
 
             var count = currCount - lastCount;
 
@@ -205,35 +203,52 @@ namespace BarrageGrab
             {
                 MsgId = e.Common.msgId,
                 RoomId = e.Common.roomId,
-                Content = $"{e.User.Nickname} 送出 {e.Gift.Name} x {currCount} 个 -> {e.toUser.Nickname}，增量{count}个",
+                //Content = $"{e.User.Nickname} : {e.Gift.Name} x {currCount} -> {e.toUser.Nickname}，count -\ngroup: {e.groupCount} |  repeat: {e.repeatCount} | combo: {e.comboCount} ",//增量:{count}",
                 DiamondCount = e.Gift.diamondCount,
                 RepeatCount = currCount,
                 GiftCount = count,
                 GiftId = e.giftId,
                 GiftName = e.Gift.Name,
                 User = GetUser(e.User),
-                To = GetUser(e.toUser),
+                //To = GetUser(e.toUser),
             };
 
-            Console.WriteLine("Before Print");
-            Print($" {enty.User.GenderToString()}  {enty.Content}", ConsoleColor.Red, BarrageMsgType.礼物消息);
-            var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.礼物消息);
-            var json = JsonConvert.SerializeObject(pack);
-            this.Broadcast(json);
+            var newEntity = new STTGift()
+            {
+                Type = "dgb",
+                Key = e.Common.msgId,
+                UserName = e.User.Nickname,
+                GiftId = e.Gift.Id,
+                GiftName = e.Gift.Name,
+                Count = (int)e.repeatCount,
+                Hits = (int)e.comboCount,
+                Price = e.Gift.diamondCount,
+                To = e.toUser?.Nickname ?? "N/A"
+            };
+
+            var consoleContent = $"{e.User.Nickname} : {e.Gift.Name} x {currCount} -> {e.toUser?.Nickname}，count -\ngroup: {e.groupCount} |  repeat: {e.repeatCount} | combo: {e.comboCount} ";//增量:{count}",
+
+            Print(consoleContent, ConsoleColor.Red, BarrageMsgType.礼物消息);
+            //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.礼物消息);
+            //var json = JsonConvert.SerializeObject(pack);
+            //this.Broadcast(json);
+            var json = JsonConvert.SerializeObject(newEntity);
+            var stream = stt.STTSerialize(json);
+            this.Broadcast(stream);
         }
 
         //关注
         private void Grab_OnSocialMessage(object sender, ProtoEntity.SocialMessage e)
         {
-            if (!CheckRoomId(e.Common.roomId)) return;
-            if (e.Action != 1) return;
-            var enty = new Msg()
-            {
-                MsgId = e.Common.msgId,
-                Content = $"{e.User.Nickname} 关注了主播",
-                RoomId = e.Common.roomId,
-                User = GetUser(e.User)
-            };
+            //if (!CheckRoomId(e.Common.roomId)) return;
+            //if (e.Action != 1) return;
+            //var enty = new Msg()
+            //{
+            //    MsgId = e.Common.msgId,
+            //    Content = $"{e.User.Nickname} 关注了主播",
+            //    RoomId = e.Common.roomId,
+            //    User = GetUser(e.User)
+            //};
 
             //Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.Yellow, BarrageMsgType.关注消息);
             //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.关注消息);
@@ -244,22 +259,22 @@ namespace BarrageGrab
         //直播间分享
         private void Grab_OnShardMessage(object sender, ProtoEntity.SocialMessage e)
         {
-            if (!CheckRoomId(e.Common.roomId)) return;
-            if (e.Action != 3) return;
-            ShareType type = ShareType.未知;
-            if (Enum.IsDefined(type.GetType(), int.Parse(e.shareTarget)))
-            {
-                type = (ShareType)int.Parse(e.shareTarget);
-            }
+            //if (!CheckRoomId(e.Common.roomId)) return;
+            //if (e.Action != 3) return;
+            //ShareType type = ShareType.未知;
+            //if (Enum.IsDefined(type.GetType(), int.Parse(e.shareTarget)))
+            //{
+            //    type = (ShareType)int.Parse(e.shareTarget);
+            //}
 
-            var enty = new ShareMessage()
-            {
-                MsgId = e.Common.msgId,
-                Content = $"{e.User.Nickname} 分享了直播间到{type}",
-                RoomId = e.Common.roomId,
-                ShareType = type,
-                User = GetUser(e.User)
-            };
+            //var enty = new ShareMessage()
+            //{
+            //    MsgId = e.Common.msgId,
+            //    Content = $"{e.User.Nickname} 分享了直播间到{type}",
+            //    RoomId = e.Common.roomId,
+            //    ShareType = type,
+            //    User = GetUser(e.User)
+            //};
             //shareTarget: (112:好友),(1微信)(2朋友圈)(3微博)(5:qq)(4:qq空间),shareType: 1
             //Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.DarkBlue, BarrageMsgType.直播间分享);
             //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.直播间分享);
@@ -275,31 +290,40 @@ namespace BarrageGrab
             var enty = new JsonEntity.MemberMessage()
             {
                 MsgId = e.Common.msgId,
-                Content = $"{e.User.Nickname} 来了 直播间人数:{e.memberCount}",
+                Content = $"{e.User.Nickname} 进入直播间", //直播间人数:{e.memberCount}",
                 RoomId = e.Common.roomId,
                 CurrentCount = e.memberCount,
                 User = GetUser(e.User)
             };
-            //Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.Green, BarrageMsgType.进直播间);
-            //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.进直播间);
-            //var json = JsonConvert.SerializeObject(pack);
-            //this.Broadcast(json);
+
+            var newEntity = new STTUserEnter()
+            {
+                Type = "uenter",
+                Key = e.Common.msgId,
+                UserName = e.User.Nickname
+            };
+
+            //Print($"{enty.Content}", ConsoleColor.Green, BarrageMsgType.进房提醒);
+            //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.进房提醒);
+            var json = JsonConvert.SerializeObject(newEntity);
+            var stream = stt.STTSerialize(json);
+            this.Broadcast(stream);
         }
 
         //点赞
         private void Grab_OnLikeMessage(object sender, ProtoEntity.LikeMessage e)
         {
-            if (!CheckRoomId(e.Common.roomId)) return;
+            //if (!CheckRoomId(e.Common.roomId)) return;
 
-            var enty = new LikeMsg()
-            {
-                MsgId = e.Common.msgId,
-                Count = e.Count,
-                Content = $"{e.User.Nickname} 为主播点了{e.Count}个赞，总点赞{e.Total}",
-                RoomId = e.Common.roomId,
-                Total = e.Total,
-                User = GetUser(e.User)
-            };
+            //var enty = new LikeMsg()
+            //{
+            //    MsgId = e.Common.msgId,
+            //    Count = e.Count,
+            //    Content = $"{e.User.Nickname} 为主播点了{e.Count}个赞，总点赞{e.Total}",
+            //    RoomId = e.Common.roomId,
+            //    Total = e.Total,
+            //    User = GetUser(e.User)
+            //};
             //Print($"{enty.User.GenderToString()}  {enty.Content}", ConsoleColor.Cyan, BarrageMsgType.点赞消息);
             //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.点赞消息);
             //var json = JsonConvert.SerializeObject(pack);
@@ -318,10 +342,22 @@ namespace BarrageGrab
                 RoomId = e.Common.roomId,
                 User = GetUser(e.User)
             };
-            Print($"{enty.User.GenderToString()}  {enty.User.Nickname}: {enty.Content}", ConsoleColor.White, BarrageMsgType.弹幕消息);
-            var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.弹幕消息);
-            var json = JsonConvert.SerializeObject(pack);
-            this.Broadcast(json);
+
+            var newEntity = new STTChatMessage()
+            {
+                Type = "chatmsg",
+                Key = e.Common.msgId,
+                UserName = e.User.Nickname,
+                Message = e.Content,
+            };
+
+            Print($"{enty.User.Nickname}: {enty.Content}", ConsoleColor.White, BarrageMsgType.弹幕消息);
+            //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.弹幕消息);
+            //var json = JsonConvert.SerializeObject(pack);
+            //this.Broadcast(json);
+            var json = JsonConvert.SerializeObject(newEntity);
+            var stream = stt.STTSerialize(json);
+            this.Broadcast(stream);
         }
 
         //直播间状态变更
@@ -398,12 +434,20 @@ namespace BarrageGrab
         /// 广播消息
         /// </summary>
         /// <param name="msg"></param>
-        public void Broadcast(string msg)
+        public void Broadcast<T>(T msg)
         {
             foreach (var user in socketList)
             {
                 var socket = user.Value;
-                socket.Socket.Send(msg);
+                switch (msg)
+                {
+                    case string s:
+                        socket.Socket.Send(s);
+                        break;
+                    case byte[] bytes:
+                        socket.Socket.Send(bytes);
+                        break;
+                }
             }
         }
 

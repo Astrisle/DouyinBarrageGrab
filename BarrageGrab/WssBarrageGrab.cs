@@ -1,15 +1,13 @@
-﻿using System;
+﻿using BarrageGrab.ProtoEntity;
+using BarrageGrab.Proxy;
+using BarrageGrab.Proxy.ProxyEventArgs;
+using ColorConsole;
+using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BarrageGrab.ProtoEntity;
-using ProtoBuf;
-using ColorConsole;
-using BarrageGrab.Proxy;
-using BarrageGrab.Proxy.ProxyEventArgs;
 
 namespace BarrageGrab
 {
@@ -71,7 +69,7 @@ namespace BarrageGrab
         public WssBarrageGrab()
         {
             proxy.OnWebSocketData += Proxy_OnWebSocketData;
-            proxy.HostNameFilter = HostNameChecker;            
+            proxy.HostNameFilter = HostNameChecker;
         }
 
         public void Start()
@@ -147,15 +145,15 @@ namespace BarrageGrab
         }
 
         //用于缓存接收过的消息ID，判断是否重复接收
-        Dictionary<string,List<long>> msgDic = new Dictionary<string,List<long>>();        
+        Dictionary<string, List<long>> msgDic = new Dictionary<string, List<long>>();
 
         //发送事件
         private void DoMessage(Message msg)
-        {            
+        {
             List<long> msgIdList;
             if (msgDic.ContainsKey(msg.Method))
             {
-                msgIdList = msgDic[msg.Method];                
+                msgIdList = msgDic[msg.Method];
             }
             else
             {
@@ -169,7 +167,7 @@ namespace BarrageGrab
 
             msgIdList.Add(msg.msgId);
             if (msgIdList.Count > 300) msgIdList.RemoveAt(0);
-            
+
             try
             {
                 switch (msg.Method)
@@ -292,7 +290,7 @@ namespace BarrageGrab
                     File.Create(fullPath);
                 }
                 var text = File.ReadAllText(fullPath);
-                var currentHosts = text.Split('\n').Where(w => !string.IsNullOrWhiteSpace(w)).Select(s=>s.Trim().Trim('\r')).ToList();
+                var currentHosts = text.Split('\n').Where(w => !string.IsNullOrWhiteSpace(w)).Select(s => s.Trim().Trim('\r')).ToList();
                 var newHosts = succPackHostNames.Except(currentHosts).ToList();
                 //保存
                 if (newHosts.Count > 0)

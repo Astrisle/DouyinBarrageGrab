@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BarrageGrab.Proxy.ProxyEventArgs;
 using Microsoft.Win32;
+using System;
 using System.Diagnostics;
-using BarrageGrab.Proxy.ProxyEventArgs;
 
 namespace BarrageGrab.Proxy
 {
@@ -17,7 +10,7 @@ namespace BarrageGrab.Proxy
         /// <summary>
         /// 域名过滤器
         /// </summary>
-        public Func<string, bool> HostNameFilter { get; set; }        
+        public Func<string, bool> HostNameFilter { get; set; }
 
         /// <summary>
         /// 接收到websocket消息事件
@@ -32,7 +25,7 @@ namespace BarrageGrab.Proxy
         /// <summary>
         /// 代理端口
         /// </summary>
-        public int ProxyPort { get => Appsetting.Current.ProxyPort; }        
+        public int ProxyPort { get => Appsetting.Current.ProxyPort; }
 
         public abstract void Dispose();
 

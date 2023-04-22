@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
+﻿using BarrageGrab.JsonEntity;
+using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BarrageGrab.JsonEntity;
 using static System.Configuration.ConfigurationManager;
 namespace BarrageGrab
 {
@@ -24,8 +20,8 @@ namespace BarrageGrab
                 ProxyPort = int.Parse(AppSettings["proxyPort"]);
                 PrintFilter = Enum.GetValues(typeof(BarrageMsgType)).Cast<int>().ToArray();
                 FilterHostName = bool.Parse(AppSettings["filterHostName"].Trim());
-                HostNameFilter = AppSettings["hostNameFilter"].Trim().Split(',').Where(w=>!string.IsNullOrWhiteSpace(w)).ToArray();
-                RoomIds = AppSettings["roomIds"].Trim().Split(',').Where(w=>!string.IsNullOrWhiteSpace(w)).Select(s => long.Parse(s)).ToArray();
+                HostNameFilter = AppSettings["hostNameFilter"].Trim().Split(',').Where(w => !string.IsNullOrWhiteSpace(w)).ToArray();
+                RoomIds = AppSettings["roomIds"].Trim().Split(',').Where(w => !string.IsNullOrWhiteSpace(w)).Select(s => long.Parse(s)).ToArray();
 
                 var printFilter = AppSettings["printFilter"].Trim().ToLower();
                 if (printFilter != "all")
@@ -38,7 +34,7 @@ namespace BarrageGrab
             {
                 Console.WriteLine("配置文件读取失败,请检查配置文件是否正确");
                 throw ex;
-            }            
+            }
         }
 
         /// <summary>
