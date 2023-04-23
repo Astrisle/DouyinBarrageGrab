@@ -321,15 +321,20 @@ namespace BarrageGrab.JsonEntity
         [JsonProperty("gfname")]
         public string GiftName { get; set; }
         /// <summary>
-        /// 礼物数量 - TODO: 区分批量/单体
+        /// 礼物总数量
         /// </summary>
         [JsonProperty("gfcnt")]
         public int Count { get; set; }
         /// <summary>
-        /// 连击数
+        /// 连击数(存疑)
         /// </summary>
         [JsonProperty("hits")]
         public int Hits { get; set; }
+        /// <summary>
+        /// 批量标识
+        /// </summary>
+        [JsonProperty("bid")]
+        public long BatchId { get; set; }
         /// <summary>
         /// 礼物价格
         /// </summary>

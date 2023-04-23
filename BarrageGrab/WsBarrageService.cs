@@ -5,7 +5,6 @@ using ColorConsole;
 using Fleck;
 using Newtonsoft.Json;
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -63,7 +62,7 @@ namespace BarrageGrab
             var timeOutKeys = giftCountCache.Where(w => w.Value.Item2 < now.AddSeconds(-10) || w.Value == null).Select(s => s.Key).ToList();
 
             //淘汰过期的礼物计数缓存
-            lock (giftCountCache)
+            lock(giftCountCache)
             {
                 timeOutKeys.ForEach(key =>
                 {
@@ -97,7 +96,7 @@ namespace BarrageGrab
                 Level = 0
             };
 
-            if (data.fansClub != null && data.fansClub.Data != null)
+            if(data.fansClub != null && data.fansClub.Data != null)
             {
                 user.FansClub.ClubName = data.fansClub.Data.clubName;
                 user.Level = data.fansClub.Data.Level;
@@ -148,17 +147,17 @@ namespace BarrageGrab
         //礼物
         private void Grab_OnGiftMessage(object sender, ProtoEntity.GiftMessage e)
         {
-            if (!CheckRoomId(e.Common.roomId)) return;
+            if(!CheckRoomId(e.Common.roomId)) return;
 
             var key = e.giftId + "-" + e.groupId.ToString();
 
             //判断礼物重复
-            if (e.repeatEnd == 1)
+            if(e.repeatEnd == 1)
             {
                 //清除缓存中的key
-                if (e.groupId > 0 && giftCountCache.ContainsKey(key))
+                if(e.groupId > 0 && giftCountCache.ContainsKey(key))
                 {
-                    lock (giftCountCache)
+                    lock(giftCountCache)
                     {
                         giftCountCache.Remove(key);
                     }
@@ -169,15 +168,15 @@ namespace BarrageGrab
             int lastCount = 0;
             int currCount = (int)e.repeatCount;
             var backward = currCount <= lastCount;
-            if (currCount <= 0) currCount = 1;
+            if(currCount <= 0) currCount = 1;
 
-            if (giftCountCache.ContainsKey(key))
+            if(giftCountCache.ContainsKey(key))
             {
                 lastCount = giftCountCache[key].Item1;
                 backward = currCount <= lastCount;
-                if (!backward)
+                if(!backward)
                 {
-                    lock (giftCountCache)
+                    lock(giftCountCache)
                     {
                         giftCountCache[key] = Tuple.Create(currCount, DateTime.Now);
                     }
@@ -185,16 +184,16 @@ namespace BarrageGrab
             }
             else
             {
-                if (e.groupId > 0 && !backward)
+                if(e.groupId > 0 && !backward)
                 {
-                    lock (giftCountCache)
+                    lock(giftCountCache)
                     {
                         giftCountCache.Add(key, Tuple.Create(currCount, DateTime.Now));
                     }
                 }
             }
             //比上次小，则说明先后顺序出了问题，直接丢掉，应为比它大的消息已经处理过了
-            if (backward) return;
+            if(backward) return;
 
 
             var count = currCount - lastCount;
@@ -222,11 +221,12 @@ namespace BarrageGrab
                 GiftName = e.Gift.Name,
                 Count = (int)e.repeatCount,
                 Hits = (int)e.comboCount,
+                BatchId = e.groupId,
                 Price = e.Gift.diamondCount,
                 To = e.toUser?.Nickname ?? "N/A"
             };
 
-            var consoleContent = $"{e.User.Nickname} : {e.Gift.Name} x {currCount} -> {e.toUser?.Nickname}，count -\ngroup: {e.groupCount} |  repeat: {e.repeatCount} | combo: {e.comboCount} ";//增量:{count}",
+            var consoleContent = $"{e.User.Nickname} : {e.Gift.Name} x {currCount} -> {e.toUser?.Nickname}，count -\ngroup: {e.groupCount} |  repeat: {e.repeatCount} | combo: {e.comboCount} \nGroupID: {e.groupId} | RepeatEnd: {e.repeatEnd}" ;//增量:{count}",
 
             Print(consoleContent, ConsoleColor.Red, BarrageMsgType.礼物消息);
             //var pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.礼物消息);
@@ -285,7 +285,7 @@ namespace BarrageGrab
         //来了
         private void Grab_OnMemberMessage(object sender, ProtoEntity.MemberMessage e)
         {
-            if (!CheckRoomId(e.Common.roomId)) return;
+            if(!CheckRoomId(e.Common.roomId)) return;
 
             var enty = new JsonEntity.MemberMessage()
             {
@@ -333,7 +333,7 @@ namespace BarrageGrab
         //弹幕
         private void Grab_OnChatMessage(object sender, ProtoEntity.ChatMessage e)
         {
-            if (!CheckRoomId(e.Common.roomId)) return;
+            if(!CheckRoomId(e.Common.roomId)) return;
 
             var enty = new Msg()
             {
@@ -363,10 +363,10 @@ namespace BarrageGrab
         //直播间状态变更
         private void Grab_OnControlMessage(object sender, ControlMessage e)
         {
-            if (!CheckRoomId(e.Common.roomId)) return;
+            if(!CheckRoomId(e.Common.roomId)) return;
             BarrageMsgPack pack = null;
             //下播
-            if (e.Status == 3)
+            if(e.Status == 3)
             {
                 var enty = new Msg()
                 {
@@ -379,7 +379,7 @@ namespace BarrageGrab
                 pack = new BarrageMsgPack(JsonConvert.SerializeObject(enty), BarrageMsgType.下播);
             }
 
-            if (pack != null)
+            if(pack != null)
             {
                 var json = JsonConvert.SerializeObject(pack);
                 this.Broadcast(json);
@@ -388,9 +388,9 @@ namespace BarrageGrab
 
         private void Print(string msg, ConsoleColor color, BarrageMsgType bartype)
         {
-            if (!Appsetting.PrintFilter.Any(a => a == bartype.GetHashCode())) return;
+            if(!Appsetting.PrintFilter.Any(a => a == bartype.GetHashCode())) return;
 
-            if (Appsetting.PrintBarrage)
+            if(Appsetting.PrintBarrage)
             {
                 console.WriteLine($"{DateTime.Now.ToString("HH:mm:ss")} [{bartype.ToString()}] " + msg + "\n", color);
             }
@@ -407,7 +407,7 @@ namespace BarrageGrab
         {
             //客户端url
             string clientUrl = socket.ConnectionInfo.ClientIpAddress + ":" + socket.ConnectionInfo.ClientPort;
-            if (!socketList.ContainsKey(clientUrl))
+            if(!socketList.ContainsKey(clientUrl))
             {
                 socketList.Add(clientUrl, new UserState(socket));
                 console.WriteLine($"{DateTime.Now.ToLongTimeString()} 已经建立与[{clientUrl}]的连接", ConsoleColor.Green);
@@ -436,10 +436,10 @@ namespace BarrageGrab
         /// <param name="msg"></param>
         public void Broadcast<T>(T msg)
         {
-            foreach (var user in socketList)
+            foreach(var user in socketList)
             {
                 var socket = user.Value;
-                switch (msg)
+                switch(msg)
                 {
                     case string s:
                         socket.Socket.Send(s);
